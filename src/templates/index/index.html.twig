@@ -1,0 +1,74 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Items{% endblock %}
+
+
+{% block body %}
+    {% for flashError in app.flashes('verify_email_error') %}
+        <div class="alert alert-danger" role="alert">{{ flashError }}</div>
+    {% endfor %}
+
+
+    <div class="row">
+        <div class="col-sm-12">
+            <h1>Products</h1>
+            <a href="{{ path('app_create') }}">Создать</a>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <td>
+                            ID
+                        </td>
+                        <td>
+                            hash
+                        </td>
+                        <td>
+                            Дата создания
+                        </td>
+                        <td>
+                            Дата время
+                        </td>
+                    </tr>
+                </thead>
+                <tbody>
+                <form action="">
+                    <tr>
+                        <td>
+                        </td>
+                        <td>
+                        </td>
+                        <td>
+                        </td>
+                        <td>
+                            <input type="text" name="date">
+                        </td>
+                        <td>
+                            <input type="submit" value="Поиск">
+                        </td>
+                    </tr>
+
+                </form>
+                {% for item in pagination %}
+                    <tr>
+                        <td>
+                            {{ item.id }}
+                        </td>
+                        <td>
+                            {{ item.hash }}
+                        </td>
+                        <td>
+                            {{ item.getCreatedAt |date('Y-m-d H:i:s') }}
+                        </td>
+                        <td>
+                            {{ item.getDate |date('Y-m-d H:i:s') }}
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            <div class="navigation">
+                {{ knp_pagination_render(pagination) }}
+            </div>
+        </div>
+    </div>
+{% endblock %}
