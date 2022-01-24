@@ -5,8 +5,7 @@ namespace App\Command;
 
 
 use App\Entity\Product;
-use App\Service\DateRetriever;
-use DateTime;
+use App\Service\MgclClient;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -16,9 +15,9 @@ class CreateProductCommand extends Command
 {
     protected static $defaultName = 'app:create-product';
     private EntityManagerInterface $entityManager;
-    private DateRetriever $dateRetriever;
+    private MgclClient $dateRetriever;
 
-    public function __construct(EntityManagerInterface $entityManager, DateRetriever $dateRetriever, string $name = null)
+    public function __construct(EntityManagerInterface $entityManager, MgclClient $dateRetriever, string $name = null)
     {
         parent::__construct($name);
         $this->entityManager = $entityManager;
@@ -31,7 +30,7 @@ class CreateProductCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $date = $this->dateRetriever->getCurrentDateTime();
+        $date = $this->dateRetriever->getDateTime();
         if ($date === null) {
             $output->writeln('Api returned invalid date');
             return Command::FAILURE;

@@ -5,18 +5,17 @@ namespace App\Controller;
 
 
 use App\Entity\Product;
-use App\Form\ProductType;
 use App\Repository\ProductRepository;
-use App\Service\DateRetriever;
+use App\Service\MgclClient;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\DateTimeType;
-use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Routing\Annotation\Route;
 
 class IndexController extends AbstractController
@@ -40,15 +39,21 @@ class IndexController extends AbstractController
     }
 
     #[Route('/create', name: 'app_create')]
-    public function create(Request $request, EntityManagerInterface $em, DateRetriever $dateRetriever): Response
+    public function create(Request $request, EntityManagerInterface $em, MgclClient $dateRetriever, Session $session): Response
     {
-        $task = new Product($dateRetriever->getCurrentDateTime(), 'manual_hash');
+        $task = new Product($dateRetriever->getDateTime(), 'manual_hash');
+        if (!$session->has('list')) {
+            $list = $dateRetriever->showlist();
+            $session->set('list', $list);
+        }
         $form = $this->createFormBuilder($task)
             ->add('date', DateTimeType::class, [
-                'disabled' => true,
+                'disabled'     => true,
                 'with_seconds' => true,
             ])
-            ->add('hash', TextType::class)
+            ->add('hash', ChoiceType::class, [
+                'choices' => $session->get('list')
+            ])
             ->add('save', SubmitType::class)
             ->getForm();
         $form->handleRequest($request);
@@ -57,6 +62,7 @@ class IndexController extends AbstractController
             $em->persist($task);
             $em->flush();
 
+            $session->remove('list');
             return $this->redirectToRoute('app_index');
         }
 
